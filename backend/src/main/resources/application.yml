@@ -1,0 +1,39 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: rentora-backend
+  profiles:
+    active: dev
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/rentora_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+# JWT Configuration
+app:
+  jwt:
+    secret: 9a4f2c8d3e5b7a1f6c8d2e4a7b9c1d3f5e7a9b1c3d5e7f9a1b3c5d7e9f1a3b5c
+    expiration-ms: 86400000 # 24 hours
+
+# SpringDoc OpenAPI / Swagger UI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
