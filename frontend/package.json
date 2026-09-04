@@ -1,6 +1,7 @@
 {
   "name": "rentora-frontend",
   "private": true,
+  "license": "Proprietary",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

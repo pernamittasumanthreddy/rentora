@@ -138,6 +138,29 @@ def audit_complete_app():
     print(f" -> Result: [{status}]")
     return passed
 
+def audit_license():
+    print("\n[8] Auditing Proprietary License Compliance (No open source license)...")
+    license_files = [f for f in ROOT.glob("LICENSE*") if not any(x in str(f) for x in ['node_modules', '.git'])]
+    has_os_license_file = len(license_files) > 0
+    
+    pkg_json = ROOT / "package.json"
+    pkg_license = None
+    if pkg_json.exists():
+        with open(pkg_json, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            pkg_license = data.get("license", None)
+            
+    is_open_source = False
+    if pkg_license and any(os_lic in str(pkg_license).upper() for os_lic in ["MIT", "APACHE", "GPL", "BSD", "MPL"]):
+        is_open_source = True
+        
+    passed = not has_os_license_file and not is_open_source and pkg_license in ["Proprietary", "UNLICENSED", None]
+    status = "PASS" if passed else "FAIL"
+    print(f" -> Open-source LICENSE files: {'FOUND' if has_os_license_file else 'NONE'}")
+    print(f" -> Package.json license: {pkg_license}")
+    print(f" -> Result: [{status}] (Required: Proprietary / No OS license)")
+    return passed
+
 def main():
     print("=" * 80)
     print("           RENTORA EVALUATOR AUDIT & COMPLIANCE VERIFICATION")
@@ -151,6 +174,7 @@ def main():
     results.append(("Executable Project Indicators", audit_executable_project()))
     results.append(("Test Coverage Included", audit_test_coverage()))
     results.append(("Complete Working Application", audit_complete_app()))
+    results.append(("No Open Source License (Proprietary)", audit_license()))
 
     print("\n" + "=" * 80)
     print("                     FINAL EVALUATOR SCORECARD")
@@ -164,7 +188,7 @@ def main():
 
     print("=" * 80)
     if all_passed:
-        print(">>> 100% PASS: ALL 7 EVALUATION CRITERIA ARE FULLY SATISFIED! <<<")
+        print(">>> 100% PASS: ALL EVALUATION CRITERIA ARE FULLY SATISFIED! <<<")
     else:
         print(">>> SOME CRITERIA FAILED <<<")
     print("=" * 80)
