@@ -11,6 +11,7 @@ import sys
 import zipfile
 import shutil
 import tempfile
+import json
 import subprocess
 from pathlib import Path
 
@@ -83,6 +84,14 @@ def create_zip():
     print(f" -> Output ZIP Size: {zip_size_mb:.2f} MB")
     print(f" -> Saved to: {OUTPUT_ZIP}")
 
+    # Also sync to Downloads folder for convenient browser file picker selection
+    downloads_zip = Path("C:/Users/BABI/Downloads/rentora_submission.zip")
+    try:
+        shutil.copyfile(OUTPUT_ZIP, downloads_zip)
+        print(f" -> Also synced to Downloads: {downloads_zip}")
+    except Exception as e:
+        print(f" -> Notice: could not copy to downloads: {e}")
+
     verify_zip()
 
 def verify_zip():
@@ -110,38 +119,42 @@ def verify_zip():
             print(f" [3] Git PR merges in extracted archive: {len(merges)} (Required: >= 4) -> {'PASS' if len(merges) >= 4 else 'FAIL'}")
             for m in merges:
                 print(f"      * {m}")
-        except Exception as ex:
-            print(f" [ERROR] Git validation failed: {ex}")
+        except Exception as e:
+            print(f" Error verifying git history in sandbox: {e}")
 
-        # 3. Check LOC
-        exts = {'.java', '.js', '.jsx', '.ts', '.tsx', '.py'}
-        excludes = {'tests', 'test', 'node_modules', '.git', 'coverage', 'dist', 'generated', 'build', 'target'}
+        # 4. Check prod LOC
+        extensions = {".java", ".js", ".jsx", ".py"}
+        excludes = {"tests", "test", "node_modules", ".git", "coverage", "dist", "generated", "build", "target"}
         total_loc = 0
-        for r, d, fs in os.walk(temp_path):
-            d[:] = [x for x in d if x.lower() not in excludes and not x.startswith('.')]
-            for f in fs:
-                if os.path.splitext(f)[1].lower() in exts:
-                    p = os.path.join(r, f)
-                    if any(exc in [part.lower() for part in p.split(os.sep)] for exc in excludes):
-                        continue
+        for root, dirs, files in os.walk(temp_path):
+            dirs[:] = [d for d in dirs if d.lower() not in excludes and not d.startswith(".")]
+            for f in files:
+                ext = os.path.splitext(f)[1].lower()
+                if ext in extensions:
                     try:
-                        with open(p, 'r', encoding='utf-8', errors='ignore') as fp:
+                        with open(os.path.join(root, f), "r", encoding="utf-8", errors="ignore") as fp:
                             total_loc += sum(1 for line in fp if line.strip())
                     except Exception:
                         pass
         print(f" [4] Total production LOC in extracted archive: {total_loc:,} (Required: >= 50,000) -> {'PASS' if total_loc >= 50000 else 'FAIL'}")
 
-        # 4. Check executable indicators
-        has_docker = (temp_path / "Dockerfile").exists()
-        has_compose = (temp_path / "docker-compose.yml").exists()
-        has_makefile = (temp_path / "Makefile").exists()
-        has_pkg = (temp_path / "package.json").exists()
-        has_app = (temp_path / "app.py").exists()
-        print(f" [5] Executable indicators: Dockerfile={has_docker}, docker-compose={has_compose}, Makefile={has_makefile}, package.json={has_pkg}, app.py={has_app}")
+        # 5. Check executables
+        exec_files = ["Dockerfile", "docker-compose.yml", "Makefile", "package.json", "app.py"]
+        indicators = {f: (temp_path / f).exists() for f in exec_files}
+        print(f" [5] Executable indicators: {', '.join(f'{k}={v}' for k, v in indicators.items())}")
 
-        # 5. Check tests
-        test_files = list((temp_path / "tests").glob("test_*.py")) if (temp_path / "tests").exists() else []
-        print(f" [6] Test suite in extracted archive: {len(test_files)} test files found.")
+        # 6. Check tests
+        tests_found = list((temp_path / "tests").glob("test_*.py")) if (temp_path / "tests").exists() else []
+        print(f" [6] Test suite in extracted archive: {len(tests_found)} test files found.")
+
+        # 7. Check license compliance
+        pkg_json = temp_path / "package.json"
+        pkg_lic = None
+        if pkg_json.exists():
+            pkg_lic = json.loads(pkg_json.read_text(encoding="utf-8")).get("license")
+        os_lic_files = list(temp_path.glob("LICENSE*"))
+        lic_passed = pkg_lic == "Proprietary" and len(os_lic_files) == 0
+        print(f" [7] Proprietary license in package.json: {pkg_lic} -> {'PASS' if lic_passed else 'FAIL'}")
 
     print("\n" + "=" * 80)
     print("ALL VERIFICATIONS COMPLETED SUCCESSFULLY!")
