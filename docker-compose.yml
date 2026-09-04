@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0.35
+    container_name: rentora-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: rentora_db
+      MYSQL_USER: rentora_user
+      MYSQL_PASSWORD: rentora_password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+    networks:
+      - rentora-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: rentora-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/rentora_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: rentora_user
+      SPRING_DATASOURCE_PASSWORD: rentora_password
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - rentora-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rentora-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - rentora-network
+
+  telematics-service:
+    build:
+      context: .
+      dockerfile: services/telematics_engine/Dockerfile
+    container_name: rentora-telematics
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    networks:
+      - rentora-network
+
+networks:
+  rentora-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
