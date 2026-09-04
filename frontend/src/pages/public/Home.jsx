@@ -19,6 +19,8 @@ import {
   Compass,
   Car,
   Bike,
+  Home as HomeIcon,
+  Building2,
   Quote,
   ThumbsUp,
   Plus,
@@ -31,6 +33,8 @@ import {
 } from 'lucide-react';
 import { storageService } from '../../services/mockStorage';
 import ProductCard from '../../components/product/ProductCard';
+import CinematicLogoReveal from '../../components/hero/CinematicLogoReveal';
+import FloatingRentalSearch from '../../components/hero/FloatingRentalSearch';
 
 const categoryIcons = {
   'Cameras & Cinematic Gear': Camera,
@@ -41,9 +45,13 @@ const categoryIcons = {
   'Outdoor & Adventure Gear': Compass,
   'Self-Drive & Luxury Cars': Car,
   'Superbikes & Touring Motorcycles': Bike,
+  'Bungalows & Heritage Properties': HomeIcon,
+  'Creative Studios & Spaces': Building2,
 };
 
 const categoryBadges = {
+  'Bungalows & Heritage Properties': 'Bungalow Luxury',
+  'Creative Studios & Spaces': 'Creative Space',
   'Self-Drive & Luxury Cars': 'Self-Drive',
   'Superbikes & Touring Motorcycles': 'Popular',
   'Cameras & Cinematic Gear': 'Pro Rig',
@@ -78,7 +86,7 @@ export default function Home() {
   const categories = storageService.getCategories();
   const products = storageService.getProducts();
 
-  // Featured category filter tab
+  // Featured category filter tab: 'all', 'bungalows', 'vehicles', 'spaces', 'gear'
   const [featuredTab, setFeaturedTab] = useState('all');
 
   // Reviews state & modal
@@ -111,26 +119,29 @@ export default function Home() {
 
   // Filtered featured products based on tabs
   const filteredFeaturedProducts = useMemo(() => {
-    if (featuredTab === 'cars') {
-      return products.filter((p) => p.categoryId === 7);
+    if (featuredTab === 'bungalows') {
+      return products.filter((p) => p.categoryId === 9);
     }
-    if (featuredTab === 'bikes') {
-      return products.filter((p) => p.categoryId === 8);
+    if (featuredTab === 'vehicles') {
+      return products.filter((p) => p.categoryId === 7 || p.categoryId === 8);
+    }
+    if (featuredTab === 'spaces') {
+      return products.filter((p) => p.categoryId === 10);
     }
     if (featuredTab === 'gear') {
-      return products.filter((p) => p.categoryId !== 7 && p.categoryId !== 8);
+      return products.filter((p) => [1, 2, 3, 4, 5, 6].includes(p.categoryId));
     }
-    // 'all': curated mix of cars, bikes, and premier cine gear
-    const vehicleIds = [9, 10, 11, 12];
-    const gearIds = [1, 2, 5, 7];
-    const curatedIds = [...vehicleIds, ...gearIds];
-    return products
-      .filter((p) => curatedIds.includes(p.id))
-      .slice(0, 8);
+    // 'all': curated mix of bungalows, vehicles, cinema gear and studios
+    const curatedIds = [13, 14, 9, 11, 15, 1, 2, 10];
+    const picked = products.filter((p) => curatedIds.includes(p.id));
+    return picked.length >= 4 ? picked : products.slice(0, 8);
   }, [products, featuredTab]);
 
   // Filtered reviews
   const filteredReviews = useMemo(() => {
+    if (reviewFilter === 'bungalows') {
+      return reviews.filter((r) => r.productId === 13 || r.productId === 14);
+    }
     if (reviewFilter === 'cars') {
       return reviews.filter((r) => r.productId === 9 || r.productId === 10);
     }
@@ -138,7 +149,7 @@ export default function Home() {
       return reviews.filter((r) => r.productId === 11 || r.productId === 12);
     }
     if (reviewFilter === 'gear') {
-      return reviews.filter((r) => r.productId !== 9 && r.productId !== 10 && r.productId !== 11 && r.productId !== 12);
+      return reviews.filter((r) => [1, 2, 3, 4, 5, 6, 15, 16].includes(r.productId));
     }
     return reviews;
   }, [reviews, reviewFilter]);
@@ -183,227 +194,107 @@ export default function Home() {
 
   return (
     <div className="space-y-20 pb-20 overflow-x-hidden">
-      {/* 1. HERO SECTION WITH RICH ANIMATIONS */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-forest-950 via-forest-900 to-forest-950 text-white pt-16 pb-24 lg:pt-24 lg:pb-32">
-        {/* Background Ambient Glow Elements */}
-        <motion.div
-          animate={{
-            scale: [1, 1.15, 1],
-            opacity: [0.12, 0.22, 0.12],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-          className="absolute -top-32 -left-20 w-96 h-96 rounded-full bg-emerald-500 blur-3xl pointer-events-none"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.08, 0.18, 0.08],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: 1,
-          }}
-          className="absolute top-1/2 -right-24 w-[28rem] h-[28rem] rounded-full bg-gold-500 blur-3xl pointer-events-none"
-        />
+      {/* 1. CINEMATIC HERO & LOGO REVEAL SECTION (LIGHT BUNGALOW BEIGE & HUNTER GREEN) */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-bungalow-100 via-bungalow-50 to-bungalow-100/90 text-hunter-950 pt-8 pb-20 lg:pt-12 lg:pb-28 bg-grain border-b border-bungalow-200/70">
+        {/* Multi-layered Ambient Background Glow & Gradients */}
+        <div className="absolute top-10 left-1/4 -translate-x-1/2 w-[34rem] h-[34rem] rounded-full bg-hunter-600/10 blur-3xl pointer-events-none animate-pulse-subtle" />
+        <div className="absolute top-1/3 right-10 w-[28rem] h-[28rem] rounded-full bg-gold-500/15 blur-3xl pointer-events-none animate-pulse-subtle" />
+        <div className="absolute -bottom-10 left-10 w-96 h-96 rounded-full bg-hunter-500/10 blur-3xl pointer-events-none" />
 
-        {/* Subtle Background Pattern */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#10B981_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+        {/* Faint Architectural Network Lines Pattern */}
+        <div className="absolute inset-0 opacity-[0.035] bg-[radial-gradient(#0F291E_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-          {/* Animated Tagline Badge */}
+          {/* CINEMATIC LOGO REVEAL COMPONENT */}
+          <CinematicLogoReveal />
+
+          {/* Sequential Headline & Subtitle Reveal */}
           <motion.div
-            initial={{ opacity: 0, y: -15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-emerald-900/70 border border-emerald-500/40 text-emerald-300 text-xs font-semibold mb-6 backdrop-blur-md shadow-lg shadow-emerald-950/40"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-gold-400 animate-spin-slow" />
-            <span>Rent • Share • Save • Sustain</span>
-            <span className="h-1 w-1 rounded-full bg-emerald-400 mx-1"></span>
-            <span className="text-gold-300 font-bold">Now with Cars &amp; Superbikes</span>
-          </motion.div>
-
-          {/* Animated Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display tracking-tight max-w-4xl mx-auto leading-tight sm:leading-none text-white"
-          >
-            Rent Vehicles &amp; Premium Gear <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-emerald-300 to-gold-400">
-              Without the Cost of Ownership.
-            </span>
-          </motion.h1>
-
-          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="mt-6 text-base sm:text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed"
+            transition={{ duration: 0.7, delay: 0.35 }}
+            className="mt-3 max-w-4xl mx-auto"
           >
-            Immediate access to self-drive 4x4 SUVs, luxury sedans, touring motorcycles, cinema cameras, drones, and high-spec tools with escrow-protected security deposits.
-          </motion.p>
+            {/* Tagline Badge */}
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-white/85 border border-hunter-800/15 text-hunter-900 text-xs font-semibold mb-5 backdrop-blur-md shadow-elevation-1">
+              <Sparkles className="w-3.5 h-3.5 text-gold-600 animate-spin-slow" />
+              <span>Architectural Bungalows</span>
+              <span className="text-bungalow-400">•</span>
+              <span>Expedition 4x4 Fleet</span>
+              <span className="text-bungalow-400">•</span>
+              <span className="text-hunter-700 font-bold">Cinema &amp; Sound Stages</span>
+            </div>
 
-          {/* Interactive Animated Search Console */}
+            {/* Headline */}
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold font-display tracking-tight text-hunter-950 leading-tight sm:leading-none">
+              Rent Exceptional Spaces &amp; High-Spec Hardware{' '}
+              <br className="hidden sm:inline" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-hunter-900 via-hunter-700 to-gold-600">
+                Without The Cost of Ownership.
+              </span>
+            </h2>
+
+            <p className="mt-5 text-sm sm:text-base lg:text-lg text-hunter-800/80 max-w-2xl mx-auto leading-relaxed font-normal">
+              Curated architectural bungalows, self-drive luxury SUVs, touring motorcycles, cinema cameras, and creative stages — backed by automated bank-grade escrow security deposits.
+            </p>
+          </motion.div>
+
+          {/* INTERACTIVE FLOATING RENTAL SEARCH CONSOLE */}
           <motion.div
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            className="mt-10 max-w-3xl mx-auto"
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="mt-8"
           >
-            <form
-              onSubmit={handleSearchSubmit}
-              className="bg-white p-3 rounded-2xl sm:rounded-full shadow-2xl flex flex-col sm:flex-row items-center gap-2 border border-gray-100 transition-all duration-300 hover:shadow-emerald-900/20 hover:shadow-2xl"
-            >
-              <div className="flex-1 flex items-center px-4 w-full sm:w-auto">
-                <Search className="w-5 h-5 text-gray-400 mr-3 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Search cars, superbikes, cinema gear, drones..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full py-2 bg-transparent text-gray-900 text-sm focus:outline-none placeholder:text-gray-400"
-                />
-              </div>
-
-              <div className="w-full sm:w-auto sm:border-l border-gray-200 px-3">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full py-2 bg-transparent text-gray-700 text-sm focus:outline-none cursor-pointer font-medium"
-                >
-                  <option value="">All Categories</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.slug}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className="w-full sm:w-auto btn-primary py-3 px-8 rounded-full text-sm font-semibold flex items-center justify-center space-x-2 shrink-0 shadow-md"
-              >
-                <span>Find Rentals</span>
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
-            </form>
-
-            {/* Quick Trending Searches */}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400">
-              <span className="font-semibold text-emerald-400">Popular:</span>
-              <button
-                type="button"
-                onClick={() => navigate('/products?category=cars-vehicles')}
-                className="hover:text-emerald-300 underline underline-offset-2 flex items-center space-x-1"
-              >
-                <Car className="w-3 h-3" />
-                <span>Mahindra Thar 4x4</span>
-              </button>
-              <span>•</span>
-              <button
-                type="button"
-                onClick={() => navigate('/products?category=bikes-motorcycles')}
-                className="hover:text-emerald-300 underline underline-offset-2 flex items-center space-x-1"
-              >
-                <Bike className="w-3 h-3" />
-                <span>Himalayan 450</span>
-              </button>
-              <span>•</span>
-              <button
-                type="button"
-                onClick={() => navigate('/products?search=BMW')}
-                className="hover:text-emerald-300 underline underline-offset-2"
-              >
-                BMW 330i
-              </button>
-              <span>•</span>
-              <button
-                type="button"
-                onClick={() => navigate('/products?search=Sony%20FX3')}
-                className="hover:text-emerald-300 underline underline-offset-2"
-              >
-                Sony FX3
-              </button>
-              <span>•</span>
-              <button
-                type="button"
-                onClick={() => navigate('/products?search=Mavic')}
-                className="hover:text-emerald-300 underline underline-offset-2"
-              >
-                DJI Mavic 3 Pro
-              </button>
-            </div>
+            <FloatingRentalSearch />
           </motion.div>
 
-          {/* Animated Value Props Badges */}
+          {/* Layered Elevation Value Props Cards (Crisp White Surfaces) */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-14 pt-10 border-t border-forest-800/80 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto text-left"
+            transition={{ duration: 0.8, delay: 0.65 }}
+            className="mt-14 pt-8 border-t border-bungalow-200/80 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-5xl mx-auto text-left"
           >
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="flex items-center space-x-3 p-2 rounded-xl transition-colors hover:bg-forest-900/60"
-            >
-              <div className="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            <div className="bg-white/95 p-4 rounded-2xl border border-bungalow-200/90 shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-200 flex items-center space-x-3.5">
+              <div className="w-11 h-11 rounded-xl bg-hunter-100 text-hunter-900 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-hunter-800" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">Escrow Protection</p>
-                <p className="text-xs text-gray-400">100% Refundable Deposits</p>
+                <p className="text-xs sm:text-sm font-bold text-hunter-950">Escrow Protected</p>
+                <p className="text-[11px] text-gray-500">100% Refundable Deposits</p>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="flex items-center space-x-3 p-2 rounded-xl transition-colors hover:bg-forest-900/60"
-            >
-              <div className="w-10 h-10 rounded-xl bg-gold-950/80 border border-gold-500/30 flex items-center justify-center shrink-0">
-                <Zap className="w-5 h-5 text-gold-400" />
+            <div className="bg-white/95 p-4 rounded-2xl border border-bungalow-200/90 shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-200 flex items-center space-x-3.5">
+              <div className="w-11 h-11 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center shrink-0">
+                <Zap className="w-5 h-5 text-gold-600" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">Tested Hardware</p>
-                <p className="text-xs text-gray-400">Full vehicle &amp; rig diagnostics</p>
+                <p className="text-xs sm:text-sm font-bold text-hunter-950">Curated &amp; Tested</p>
+                <p className="text-[11px] text-gray-500">Rigorous 40-pt Inspection</p>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="flex items-center space-x-3 p-2 rounded-xl transition-colors hover:bg-forest-900/60"
-            >
-              <div className="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-500/30 flex items-center justify-center shrink-0">
-                <RotateCcw className="w-5 h-5 text-emerald-400" />
+            <div className="bg-white/95 p-4 rounded-2xl border border-bungalow-200/90 shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-200 flex items-center space-x-3.5">
+              <div className="w-11 h-11 rounded-xl bg-hunter-100 text-hunter-900 flex items-center justify-center shrink-0">
+                <RotateCcw className="w-5 h-5 text-hunter-800" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">Flexible Durations</p>
-                <p className="text-xs text-gray-400">Daily, weekend, or monthly</p>
+                <p className="text-xs sm:text-sm font-bold text-hunter-950">Flexible Terms</p>
+                <p className="text-[11px] text-gray-500">Daily, Weekend or Monthly</p>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              whileHover={{ y: -4 }}
-              className="flex items-center space-x-3 p-2 rounded-xl transition-colors hover:bg-forest-900/60"
-            >
-              <div className="w-10 h-10 rounded-xl bg-gold-950/80 border border-gold-500/30 flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-5 h-5 text-gold-400" />
+            <div className="bg-white/95 p-4 rounded-2xl border border-bungalow-200/90 shadow-elevation-1 hover:shadow-elevation-2 transition-all duration-200 flex items-center space-x-3.5">
+              <div className="w-11 h-11 rounded-xl bg-gold-100 text-gold-800 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-5 h-5 text-gold-600" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">Zero Hidden Charges</p>
-                <p className="text-xs text-gray-400">Clear GST invoice &amp; insurance</p>
+                <p className="text-xs sm:text-sm font-bold text-hunter-950">Zero Hidden Fees</p>
+                <p className="text-[11px] text-gray-500">Transparent GST Invoicing</p>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -412,17 +303,17 @@ export default function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center space-x-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Curated Departments</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-hunter-700 flex items-center space-x-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-gold-600" />
+              <span>Curated Marketplace Departments</span>
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold font-display text-gray-900 mt-1">
-              Explore by Equipment &amp; Vehicle Category
+            <h2 className="text-2xl sm:text-3xl font-bold font-display text-hunter-950 mt-1">
+              Explore by Stays, Fleet &amp; Hardware Category
             </h2>
           </div>
           <Link
             to="/products"
-            className="hidden sm:inline-flex items-center space-x-1 text-sm font-semibold text-forest-900 hover:text-emerald-700 transition-colors"
+            className="hidden sm:inline-flex items-center space-x-1 text-sm font-semibold text-hunter-900 hover:text-hunter-700 transition-colors"
           >
             <span>View All ({categories.length})</span>
             <ArrowRight className="w-4 h-4" />
@@ -434,50 +325,53 @@ export default function Home() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
-          className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6"
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5"
         >
           {categories.map((category) => {
             const IconComponent = categoryIcons[category.name] || Camera;
             const badge = categoryBadges[category.name];
-            const isVehicle = category.slug === 'cars-vehicles' || category.slug === 'bikes-motorcycles';
+            const isHighlight =
+              category.slug === 'properties-bungalows' ||
+              category.slug === 'cars-vehicles' ||
+              category.slug === 'studios-spaces';
 
             return (
               <motion.div
                 key={category.id}
                 variants={itemVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
+                whileHover={{ y: -6, scale: 1.02 }}
                 transition={{ type: 'spring', stiffness: 350, damping: 25 }}
               >
                 <Link
                   to={`/products?category=${category.slug}`}
-                  className={`relative p-5 text-center flex flex-col items-center justify-center group bg-white border rounded-2xl shadow-sm transition-all duration-300 hover:shadow-xl ${
-                    isVehicle
-                      ? 'border-emerald-200 ring-1 ring-emerald-500/20 bg-gradient-to-b from-emerald-50/30 to-white'
-                      : 'border-gray-100 hover:border-emerald-200'
+                  className={`relative p-5 text-center flex flex-col items-center justify-center group bg-white border rounded-2xl shadow-elevation-1 transition-all duration-300 hover:shadow-elevation-2 ${
+                    isHighlight
+                      ? 'border-hunter-300 ring-1 ring-hunter-500/20 bg-gradient-to-b from-bungalow-50/60 to-white'
+                      : 'border-bungalow-200/90 hover:border-hunter-400'
                   }`}
                 >
                   {badge && (
-                    <span className="absolute top-3 right-3 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-forest-900 text-white shadow-sm">
+                    <span className="absolute top-2.5 right-2.5 text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-hunter-900 text-gold-300 shadow-sm">
                       {badge}
                     </span>
                   )}
 
                   <div
-                    className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3.5 transition-all duration-300 ${
-                      isVehicle
-                        ? 'bg-emerald-900 text-emerald-300 group-hover:bg-forest-950 group-hover:text-gold-300 group-hover:scale-110'
-                        : 'bg-forest-50 text-forest-900 group-hover:bg-forest-900 group-hover:text-white group-hover:scale-110'
+                    className={`w-13 h-13 p-3 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 ${
+                      isHighlight
+                        ? 'bg-hunter-900 text-gold-300 group-hover:bg-hunter-950 group-hover:scale-110'
+                        : 'bg-bungalow-100 text-hunter-900 group-hover:bg-hunter-900 group-hover:text-white group-hover:scale-110'
                     }`}
                   >
-                    <IconComponent className="w-7 h-7" />
+                    <IconComponent className="w-6 h-6" />
                   </div>
 
-                  <h3 className="text-sm font-bold text-gray-900 group-hover:text-forest-900 transition-colors">
+                  <h3 className="text-xs sm:text-sm font-bold text-hunter-950 group-hover:text-hunter-800 transition-colors line-clamp-1">
                     {category.name}
                   </h3>
-                  <span className="text-xs text-gray-500 mt-1 flex items-center space-x-1">
-                    <span>{category.itemCount} items</span>
-                    <span className="text-emerald-600 font-semibold">• Instant Book</span>
+                  <span className="text-[11px] text-gray-500 mt-1 flex items-center space-x-1">
+                    <span>{category.itemCount} available</span>
+                    <span className="text-hunter-600 font-semibold">• Escrow</span>
                   </span>
                 </Link>
               </motion.div>
@@ -486,59 +380,70 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* 3. FEATURED PRODUCTS & VEHICLES */}
+      {/* 3. FEATURED PRODUCTS, BUNGALOWS & FLEET */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-gold-700 flex items-center space-x-1.5">
               <Flame className="w-4 h-4 text-gold-500" />
-              <span>Handpicked Highlights</span>
+              <span>Curated Selection</span>
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold font-display text-gray-900 mt-1">
-              Featured Commercial Rentals &amp; Rides
+            <h2 className="text-2xl sm:text-3xl font-bold font-display text-hunter-950 mt-1">
+              Featured Commercial Rentals &amp; Stays
             </h2>
           </div>
 
           {/* Interactive Filter Tabs */}
-          <div className="flex items-center space-x-2 bg-gray-100 p-1.5 rounded-xl text-xs font-semibold overflow-x-auto">
+          <div className="flex items-center space-x-1.5 bg-white p-1.5 rounded-2xl text-xs font-semibold overflow-x-auto shadow-elevation-1 border border-bungalow-200">
             <button
               onClick={() => setFeaturedTab('all')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-xl transition-all ${
                 featuredTab === 'all'
-                  ? 'bg-forest-900 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-hunter-900 text-white shadow-sm'
+                  : 'text-hunter-800 hover:text-hunter-950 hover:bg-bungalow-100/60'
               }`}
             >
               All Featured
             </button>
             <button
-              onClick={() => setFeaturedTab('cars')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center space-x-1 ${
-                featuredTab === 'cars'
-                  ? 'bg-forest-900 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+              onClick={() => setFeaturedTab('bungalows')}
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center space-x-1 ${
+                featuredTab === 'bungalows'
+                  ? 'bg-hunter-900 text-white shadow-sm'
+                  : 'text-hunter-800 hover:text-hunter-950 hover:bg-bungalow-100/60'
+              }`}
+            >
+              <HomeIcon className="w-3.5 h-3.5 text-gold-400" />
+              <span>Bungalows</span>
+            </button>
+            <button
+              onClick={() => setFeaturedTab('vehicles')}
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center space-x-1 ${
+                featuredTab === 'vehicles'
+                  ? 'bg-hunter-900 text-white shadow-sm'
+                  : 'text-hunter-800 hover:text-hunter-950 hover:bg-bungalow-100/60'
               }`}
             >
               <Car className="w-3.5 h-3.5" />
-              <span>Cars &amp; SUVs</span>
+              <span>Vehicles &amp; Rides</span>
             </button>
             <button
-              onClick={() => setFeaturedTab('bikes')}
-              className={`px-3 py-1.5 rounded-lg transition-all flex items-center space-x-1 ${
-                featuredTab === 'bikes'
-                  ? 'bg-forest-900 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+              onClick={() => setFeaturedTab('spaces')}
+              className={`px-3 py-1.5 rounded-xl transition-all flex items-center space-x-1 ${
+                featuredTab === 'spaces'
+                  ? 'bg-hunter-900 text-white shadow-sm'
+                  : 'text-hunter-800 hover:text-hunter-950 hover:bg-bungalow-100/60'
               }`}
             >
-              <Bike className="w-3.5 h-3.5" />
-              <span>Superbikes</span>
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Studios &amp; Spaces</span>
             </button>
             <button
               onClick={() => setFeaturedTab('gear')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
+              className={`px-3 py-1.5 rounded-xl transition-all ${
                 featuredTab === 'gear'
-                  ? 'bg-forest-900 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-hunter-900 text-white shadow-sm'
+                  : 'text-hunter-800 hover:text-hunter-950 hover:bg-bungalow-100/60'
               }`}
             >
               Cinema &amp; Tech
@@ -573,40 +478,40 @@ export default function Home() {
         <div className="mt-8 text-center">
           <Link
             to="/products"
-            className="inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-forest-900 text-white text-sm font-semibold hover:bg-forest-800 transition-colors shadow-md"
+            className="inline-flex items-center space-x-2 px-6 py-3 rounded-full bg-hunter-900 text-white text-sm font-semibold hover:bg-hunter-800 transition-colors shadow-elevation-1 hover:shadow-elevation-2"
           >
-            <span>Explore Entire Fleet &amp; Inventory</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Explore Entire Fleet &amp; Stays</span>
+            <ArrowRight className="w-4 h-4 text-gold-400" />
           </Link>
         </div>
       </section>
 
       {/* 4. VERIFIED REVIEWS & RATINGS (ANIMATED SHOWCASE) */}
-      <section className="bg-sand-200/50 py-16 border-y border-gray-200 relative overflow-hidden">
-        {/* Subtle decorative circles */}
-        <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-emerald-200/40 blur-2xl pointer-events-none" />
-        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-gold-200/40 blur-2xl pointer-events-none" />
+      <section className="bg-bungalow-100/70 py-16 border-y border-bungalow-200 relative overflow-hidden bg-grain">
+        {/* Subtle ambient decorative circles */}
+        <div className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-hunter-600/10 blur-2xl pointer-events-none" />
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-gold-400/15 blur-2xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Header & Rating Summary */}
           <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-12 gap-6">
             <div>
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-2">
-                <Award className="w-3.5 h-3.5 text-emerald-700" />
+              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-hunter-100 text-hunter-900 text-xs font-bold uppercase tracking-wider mb-2 border border-hunter-200/60">
+                <Award className="w-3.5 h-3.5 text-hunter-700" />
                 <span>Verified Renter Reviews &amp; Ratings</span>
               </div>
-              <h2 className="text-3xl font-extrabold font-display text-gray-900">
+              <h2 className="text-3xl font-extrabold font-display text-hunter-950">
                 What Renters Say About Rentora
               </h2>
-              <p className="text-sm text-gray-600 mt-2 max-w-xl">
-                Real feedback from filmmakers, road-trippers, event planners, and weekend explorers across India.
+              <p className="text-sm text-hunter-800/80 mt-2 max-w-xl">
+                Real feedback from filmmakers, road-trippers, event planners, and vacationers across India.
               </p>
             </div>
 
             {/* Scorecard Box & Write Review Button */}
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center space-x-3 bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-200">
-                <div className="text-3xl font-extrabold font-display text-forest-950">
+              <div className="flex items-center space-x-3 bg-white px-5 py-3 rounded-2xl shadow-elevation-1 border border-bungalow-200">
+                <div className="text-3xl font-extrabold font-display text-hunter-950">
                   4.9
                 </div>
                 <div>
@@ -625,7 +530,7 @@ export default function Home() {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => setIsReviewModalOpen(true)}
-                className="btn-primary py-3 px-5 rounded-2xl text-xs font-bold flex items-center space-x-2 shadow-md"
+                className="btn-primary py-3 px-5 rounded-2xl text-xs font-bold flex items-center space-x-2 shadow-elevation-1"
               >
                 <Plus className="w-4 h-4" />
                 <span>Write a Review</span>
@@ -639,18 +544,29 @@ export default function Home() {
               onClick={() => setReviewFilter('all')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 reviewFilter === 'all'
-                  ? 'bg-forest-900 text-white shadow-sm'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-hunter-900 text-white shadow-elevation-1'
+                  : 'bg-white text-hunter-900 border border-bungalow-200 hover:bg-bungalow-50'
               }`}
             >
               All Reviews ({reviews.length})
             </button>
             <button
+              onClick={() => setReviewFilter('bungalows')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+                reviewFilter === 'bungalows'
+                  ? 'bg-hunter-900 text-white shadow-elevation-1'
+                  : 'bg-white text-hunter-900 border border-bungalow-200 hover:bg-bungalow-50'
+              }`}
+            >
+              <HomeIcon className="w-3.5 h-3.5 text-gold-500" />
+              <span>Bungalows &amp; Stays</span>
+            </button>
+            <button
               onClick={() => setReviewFilter('cars')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
                 reviewFilter === 'cars'
-                  ? 'bg-forest-900 text-white shadow-sm'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-hunter-900 text-white shadow-elevation-1'
+                  : 'bg-white text-hunter-900 border border-bungalow-200 hover:bg-bungalow-50'
               }`}
             >
               <Car className="w-3.5 h-3.5" />
@@ -660,8 +576,8 @@ export default function Home() {
               onClick={() => setReviewFilter('bikes')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
                 reviewFilter === 'bikes'
-                  ? 'bg-forest-900 text-white shadow-sm'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-hunter-900 text-white shadow-elevation-1'
+                  : 'bg-white text-hunter-900 border border-bungalow-200 hover:bg-bungalow-50'
               }`}
             >
               <Bike className="w-3.5 h-3.5" />
@@ -671,11 +587,11 @@ export default function Home() {
               onClick={() => setReviewFilter('gear')}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 reviewFilter === 'gear'
-                  ? 'bg-forest-900 text-white shadow-sm'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-hunter-900 text-white shadow-elevation-1'
+                  : 'bg-white text-hunter-900 border border-bungalow-200 hover:bg-bungalow-50'
               }`}
             >
-              Cinema Gear &amp; Drones
+              Cinema Gear &amp; Studios
             </button>
           </div>
 
