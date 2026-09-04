@@ -4,7 +4,13 @@ node_modules/
 .pnp
 .pnp.js
 
-# Testing & Coverage
+# Python Cache & Testing
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+htmlcov/
+.coverage
 coverage/
 
 # Production builds
