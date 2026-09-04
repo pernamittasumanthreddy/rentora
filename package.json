@@ -23,7 +23,7 @@
     "full-stack"
   ],
   "author": "Rentora Engineering Team",
-  "license": "MIT",
+  "private": true,`n  "license": "Proprietary",
   "dependencies": {},
   "devDependencies": {
     "concurrently": "^8.2.2"
